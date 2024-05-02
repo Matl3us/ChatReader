@@ -24,6 +24,7 @@ using (ClientWebSocket client = new())
     {
         await client.ConnectAsync(new Uri("wss://irc-ws.chat.twitch.tv:443"), CancellationToken.None);
         var buffer = new byte[256];
+        var sb = new StringBuilder();
 
         Console.WriteLine("Connection opened");
         await client.SendAsync(Encoding.UTF8.GetBytes($"PASS oauth:{token}"), WebSocketMessageType.Text, true, CancellationToken.None);
@@ -32,8 +33,17 @@ using (ClientWebSocket client = new())
 
         while (client.State == WebSocketState.Open)
         {
-            var result = await client.ReceiveAsync(buffer, CancellationToken.None);
-            Console.WriteLine(Encoding.UTF8.GetString(buffer, 0, result.Count));
+            WebSocketReceiveResult? result = null;
+            do
+            {
+                result = await client.ReceiveAsync(buffer, CancellationToken.None);
+                sb.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
+            } while (!result.EndOfMessage);
+
+            Console.Write(Parser.ParseMessage(sb.ToString()));
+            Console.WriteLine("===================================================");
+
+            sb.Clear();
         }
     }
     catch (Exception e)
