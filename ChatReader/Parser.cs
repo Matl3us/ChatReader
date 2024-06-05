@@ -10,10 +10,6 @@ public static class Parser
 
         bool tagsPresent = msgFragments[0].StartsWith('@');
         string tagsString = tagsPresent ? msgFragments[0] : "";
-        if (tagsPresent)
-        {
-            ParseTags(tagsString, ref iRCMessage);
-        }
 
         int prefixIndex = tagsPresent ? 1 : 0;
         bool prefixPresent = msgFragments[prefixIndex].StartsWith(':');
@@ -27,29 +23,98 @@ public static class Parser
         string command = msgFragments[commandIndex];
         string paramsString = string.Join(" ", msgFragments[(commandIndex + 1)..]);
         ParseCommand(command, paramsString, ref iRCMessage);
+        if (tagsPresent)
+        {
+            ParseTags(tagsString, ref iRCMessage);
+        }
 
         return iRCMessage;
     }
 
     public static void ParseTags(string tagsString, ref IRCMessage iRCMessage)
     {
-        var tagsList = new Dictionary<string, string>();
-        string[] tags = tagsString[1..].Split(';');
+        string[] tagsFragments = tagsString[1..].Split(';');
+        ITags tags;
+        switch (iRCMessage.Command)
+        {
+            case IRCMessageCommand.PRIVMSG:
+                tags = ParsePRIVMSGTags(tagsFragments);
+                break;
+            default:
+                return;
+        }
+        iRCMessage.Tags = tags;
+    }
 
-        foreach (string tag in tags)
+    public static ITags ParsePRIVMSGTags(string[] tagsFragments)
+    {
+        var tags = new PRIVMSGTags();
+        foreach (string tag in tagsFragments)
         {
             string[] parts = tag.Split('=');
             if (parts.Length == 2)
             {
-                tagsList.Add(parts[0], parts[1]);
+                switch (parts[0])
+                {
+                    case "badge-info":
+                        tags.BadgeInfo = parts[1];
+                        break;
+                    case "badges":
+                        string[] badges = parts[1].Split(',');
+                        tags.Badges = new List<string>(badges);
+                        break;
+                    case "bits":
+                        if (int.TryParse(parts[1], out int bits))
+                        {
+                            tags.Bits = bits;
+                        }
+                        break;
+                    case "color":
+                        tags.Color = parts[1];
+                        break;
+                    case "display-name":
+                        tags.DisplayName = parts[1];
+                        break;
+                    case "emotes":
+                        string[] emotes = parts[1].Split(',');
+                        tags.Emotes = new List<string>(emotes);
+                        break;
+                    case "id":
+                        tags.Id = parts[1];
+                        break;
+                    case "mod":
+                        tags.Mod = parts[1] != "0";
+                        break;
+                    case "room-id":
+                        tags.RoomId = parts[1];
+                        break;
+                    case "subscriber":
+                        tags.Subscriber = parts[1] != "0";
+                        break;
+                    case "tmi-sent-ts":
+                        if (double.TryParse(parts[1], out double time))
+                        {
+                            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+                            dateTime = dateTime.AddMilliseconds(time).ToLocalTime();
+                            tags.TmiSentTs = dateTime;
+                        }
+                        break;
+                    case "turbo":
+                        tags.Turbo = parts[1] != "0";
+                        break;
+                    case "user-id":
+                        tags.UserId = parts[1];
+                        break;
+                    case "user-type":
+                        tags.UserType = parts[1];
+                        break;
+                    case "vip":
+                        tags.Vip = parts[1] != "0";
+                        break;
+                }
             }
         }
-
-        Console.WriteLine("--- Tags ---");
-        foreach (var tag in tagsList)
-        {
-            Console.WriteLine($"Key: {tag.Key} Value: {tag.Value}");
-        }
+        return tags;
     }
 
     public static void ParsePrefix(string prefixString, ref IRCMessage iRCMessage)

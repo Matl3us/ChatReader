@@ -44,6 +44,7 @@ using (ClientWebSocket webSocket = new())
         await webSocket.SendAsync(Encoding.UTF8.GetBytes($"PASS oauth:{auth.Token}"), WebSocketMessageType.Text, true, CancellationToken.None);
         await webSocket.SendAsync(Encoding.UTF8.GetBytes($"NICK {nick}"), WebSocketMessageType.Text, true, CancellationToken.None);
         await webSocket.SendAsync(Encoding.UTF8.GetBytes($"JOIN #{channel}"), WebSocketMessageType.Text, true, CancellationToken.None);
+        await webSocket.SendAsync(Encoding.UTF8.GetBytes("CAP REQ :twitch.tv/commands twitch.tv/tags"), WebSocketMessageType.Text, true, CancellationToken.None);
 
         while (webSocket.State == WebSocketState.Open)
         {
