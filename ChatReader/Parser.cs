@@ -1,84 +1,82 @@
-using System.Text;
+namespace ChatReader;
 
-namespace ChatReader
+public static class Parser
 {
-    enum IRCMessage
+    public static IRCMessage ParseMessage(string message)
     {
-        JOIN,
-        NICK,
-        NOTICE,
-        PART,
-        PASS,
-        PING,
-        PONG,
-        PRIVMSG,
+        message = message.TrimEnd();
+        var iRCMessage = new IRCMessage();
+        string[] msgFragments = message.Split(' ');
+
+        bool tagsPresent = msgFragments[0].StartsWith('@');
+        string tagsString = tagsPresent ? msgFragments[0] : "";
+        if (tagsPresent)
+        {
+            ParseTags(tagsString, ref iRCMessage);
+        }
+
+        int prefixIndex = tagsPresent ? 1 : 0;
+        bool prefixPresent = msgFragments[prefixIndex].StartsWith(':');
+        string prefixString = prefixPresent ? msgFragments[prefixIndex] : "";
+        if (prefixPresent)
+        {
+            ParsePrefix(prefixString, ref iRCMessage);
+        }
+
+        int commandIndex = (tagsPresent ? 1 : 0) + (prefixPresent ? 1 : 0);
+        string command = msgFragments[commandIndex];
+        string paramsString = string.Join(" ", msgFragments[(commandIndex + 1)..]);
+        ParseCommand(command, paramsString, ref iRCMessage);
+
+        return iRCMessage;
     }
 
-    public struct ChatMessage
+    public static void ParseTags(string tagsString, ref IRCMessage iRCMessage)
     {
-        public string User { get; set; }
-        public string Command { get; set; }
-        public string Channel { get; set; }
-        public string Content { get; set; }
-        public override readonly string ToString()
+        var tagsList = new Dictionary<string, string>();
+        string[] tags = tagsString[1..].Split(';');
+
+        foreach (string tag in tags)
         {
-            return $"User: {User} | Command: {Command} | Channel: {Channel}\nContent: {Content}\n";
+            string[] parts = tag.Split('=');
+            if (parts.Length == 2)
+            {
+                tagsList.Add(parts[0], parts[1]);
+            }
+        }
+
+        Console.WriteLine("--- Tags ---");
+        foreach (var tag in tagsList)
+        {
+            Console.WriteLine($"Key: {tag.Key} Value: {tag.Value}");
         }
     }
 
-    public static class Parser
+    public static void ParsePrefix(string prefixString, ref IRCMessage iRCMessage)
     {
-        public static string ParseMessage(string message)
+        string[] prefixFragments = prefixString[1..].Split('!');
+        iRCMessage.Prefix = prefixString;
+
+        if (prefixFragments.Length == 2)
         {
-            List<ChatMessage> chatMessages = [];
-            string[] singleMsg = message.Trim().Split('\n');
-            foreach (var msg in singleMsg)
-            {
-                ChatMessage chatMessage = new();
-                string[] parts = msg.Split(':');
-                string prefix = parts[1];
-
-                ParsePrefix(prefix, ref chatMessage);
-                if (parts.Length > 2)
-                {
-                    string content = parts[2];
-                    chatMessage.Content = content;
-                }
-
-                chatMessages.Add(chatMessage);
-            }
-
-            StringBuilder sb = new();
-            foreach (var msg in chatMessages)
-            {
-                sb.Append(msg.ToString());
-            }
-            return sb.ToString();
+            iRCMessage.User = prefixFragments[0];
         }
+    }
 
-        public static void ParsePrefix(string prefix, ref ChatMessage chatMessage)
+    public static void ParseCommand(string command, string paramsString, ref IRCMessage iRCMessage)
+    {
+        IRCMessageCommand value;
+        iRCMessage.Command = Enum.TryParse(command, out value) ? value : IRCMessageCommand.INVALID;
+
+        if (iRCMessage.Command == IRCMessageCommand.PRIVMSG)
         {
-            string[] parts = prefix.Trim().Split(' ');
-            foreach (var part in parts)
+            string[] paramsFragments = paramsString.Split(':', 2);
+            iRCMessage.Channel = paramsFragments[0][1..^1];
+            if (paramsFragments.Length > 1)
             {
-                ParsePrefixPart(part, ref chatMessage);
+                iRCMessage.Content = paramsFragments[1];
             }
         }
-
-        public static void ParsePrefixPart(string part, ref ChatMessage chatMessage)
-        {
-            if (part.EndsWith("tmi.twitch.tv"))
-            {
-                chatMessage.User = part.Contains('@') ? part.Split('!')[0] : "tmi.twitch.tv";
-            }
-            else if (Enum.GetNames(typeof(IRCMessage)).Contains(part))
-            {
-                chatMessage.Command = part;
-            }
-            else if (part.StartsWith('#'))
-            {
-                chatMessage.Channel = part;
-            }
-        }
+        iRCMessage.Params = paramsString;
     }
 }

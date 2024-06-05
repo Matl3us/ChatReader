@@ -117,15 +117,14 @@ using (ClientWebSocket webSocket = new())
                 sb.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
             } while (!result.EndOfMessage);
 
-            Console.Write(Parser.ParseMessage(sb.ToString()));
-            Console.WriteLine("===================================================");
-
+            var iRCMessage = Parser.ParseMessage(sb.ToString());
+            Console.WriteLine(iRCMessage.ToString());
             sb.Clear();
         }
     }
     catch (Exception e)
     {
-        Console.Error.WriteLine("Error has ocurred:\n" + e.Message);
+        Console.Error.WriteLine("Error has ocurred:\n" + e.Message + e.ToString());
         return;
     }
 }
