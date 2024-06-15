@@ -1,4 +1,4 @@
-namespace ChatReader;
+namespace ChatReader.Utils;
 
 public static class Parser
 {

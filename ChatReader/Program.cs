@@ -1,8 +1,10 @@
 using ChatReader.Data;
+using ChatReader.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<UserData>();
+builder.Services.AddSingleton<IWebSocketClient, TwitchWebSocketClient>();
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();

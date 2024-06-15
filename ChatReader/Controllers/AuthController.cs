@@ -1,13 +1,15 @@
 using System.Text.Json;
 using ChatReader.Data;
 using ChatReader.Dto;
+using ChatReader.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatReader.Controllers;
 
-public class AuthController(IHttpClientFactory clientFactory, UserData user) : Controller
+public class AuthController(IHttpClientFactory clientFactory, IWebSocketClient webSocket, UserData user) : Controller
 {
     private readonly UserData _user = user;
+    private readonly IWebSocketClient _websocketClient = webSocket;
     private readonly IHttpClientFactory _httpClientFactory = clientFactory;
 
     [HttpGet]
@@ -45,7 +47,7 @@ public class AuthController(IHttpClientFactory clientFactory, UserData user) : C
                 return BadRequest(new { error = "Invalid token received" });
             }
 
-            HttpContext.Session.SetString("Token", token);
+            _websocketClient.Start(token, CancellationToken.None);
             return Ok(new { msg = "Authenticated successfully" });
         }
         else
