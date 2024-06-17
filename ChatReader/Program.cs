@@ -26,6 +26,8 @@ app.UseRouting();
 app.UseCors();
 app.UseAuthorization();
 
+app.UseFileServer();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
