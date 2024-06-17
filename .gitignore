@@ -3,6 +3,9 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+# Generated frontend files
+wwwroot
+
 # dotenv files
 .env
 

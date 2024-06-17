@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<UserData>();
 builder.Services.AddSingleton<IWebSocketClient, TwitchWebSocketClient>();
+builder.Services.AddSingleton<WebSocketService>();
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
@@ -27,6 +28,13 @@ app.UseCors();
 app.UseAuthorization();
 
 app.UseFileServer();
+
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+};
+
+app.UseWebSockets(webSocketOptions);
 
 app.MapControllerRoute(
     name: "default",
