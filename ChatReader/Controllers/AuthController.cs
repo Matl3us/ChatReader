@@ -48,7 +48,14 @@ public class AuthController(IHttpClientFactory clientFactory, IWebSocketClient w
             }
 
             _websocketClient.Start(token, CancellationToken.None);
-            return Ok(new { msg = "Authenticated successfully" });
+
+            Response.Cookies.Append("token", "123", new CookieOptions
+            {
+                Secure = true,
+                HttpOnly = true,
+                SameSite = SameSiteMode.Strict
+            });
+            return Redirect("http://localhost:5293/#/chat");
         }
         else
         {
