@@ -8,6 +8,7 @@ public class TwitchWebSocketClient(UserData user) : IWebSocketClient
 {
     private readonly UserData _user = user;
     private readonly ClientWebSocket webSocket = new();
+    private readonly Queue<string> _parsedMessages = new();
 
     public async void Start(string token, CancellationToken cancellationToken)
     {
@@ -40,7 +41,7 @@ public class TwitchWebSocketClient(UserData user) : IWebSocketClient
                     sb.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
                 } while (!result.EndOfMessage);
 
-                Console.WriteLine(sb.ToString());
+                _parsedMessages.Enqueue(sb.ToString());
                 sb.Clear();
             }
         }
@@ -59,6 +60,15 @@ public class TwitchWebSocketClient(UserData user) : IWebSocketClient
         }
         var bytes = Encoding.UTF8.GetBytes(message);
         await webSocket.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken);
+    }
+
+    public string? DequeueParsedMessage()
+    {
+        if (_parsedMessages.Count != 0)
+        {
+            return _parsedMessages.Dequeue();
+        }
+        return null;
     }
 
 }
