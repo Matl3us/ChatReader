@@ -4,6 +4,11 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>57b060df-a5d5-4488-b4f3-86548e76bde1</UserSecretsId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChatReader.Core\ChatReader.Core.csproj" />
+  </ItemGroup>
 
 </Project>
