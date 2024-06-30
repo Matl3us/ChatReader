@@ -25,8 +25,22 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddHttpClient<IAuthService, AuthService>();
+builder.Services.AddSingleton<ConcurentWebSockets>();
 
 var app = builder.Build();
+
+var cookiePolicyOptions = new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Strict,
+};
+app.UseCookiePolicy(cookiePolicyOptions);
+
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+};
+
+app.UseWebSockets(webSocketOptions);
 
 app.UseRouting();
 app.UseCors();
