@@ -1,6 +1,9 @@
 ﻿using ChatReader.Core.Interfaces;
 using ChatReader.Core.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ChatReader.Controllers
 {
@@ -13,11 +16,24 @@ namespace ChatReader.Controllers
         [HttpGet]
         public async Task<ActionResult> Index([FromQuery] CodeAuthDto codeAuth)
         {
-            var tokenAuth = await _authService.Authenticate(codeAuth.Code);
-            if (tokenAuth == null)
+            var user = await _authService.AuthenticateAsync(codeAuth.Code);
+            if (user == null)
             {
                 return BadRequest(new { error = "Authentication failed" });
             }
+
+            var claims = new List<Claim>
+            {
+                new("Id", user.Id),
+                new("Nick", user.Nick),
+                new("Token", user.Token),
+            };
+            var claimsIdentity = new ClaimsIdentity(
+                claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+
             return Ok(new { msg = "Authenticated successfully" });
         }
     }
