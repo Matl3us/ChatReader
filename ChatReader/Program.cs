@@ -1,3 +1,4 @@
+using ChatReader.Core;
 using ChatReader.Core.Interfaces;
 using ChatReader.Core.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -25,7 +26,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddHttpClient<IAuthService, AuthService>();
-builder.Services.AddSingleton<ConcurentWebSockets>();
+builder.Services.AddSingleton<WebSocketConnections>();
+builder.Services.AddSingleton<TwitchIRCConnections>();
+builder.Services.AddScoped<WSConnectionsManager>();
 
 var app = builder.Build();
 
