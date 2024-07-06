@@ -5,7 +5,9 @@ VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatReader", "ChatReader\ChatReader.csproj", "{06686219-37B3-4D75-AD1D-D6FB439564A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatReader.Core", "ChatReader.Core\ChatReader.Core.csproj", "{DC6526FB-FB39-4548-A180-51E1C846A77D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatReader.Core", "ChatReader.Core\ChatReader.Core.csproj", "{DC6526FB-FB39-4548-A180-51E1C846A77D}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "ChatReader.Client", "ChatReader.Client\ChatReader.Client.esproj", "{C5662298-7FCD-416B-8468-0EC4B5F58157}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,12 @@ Global
 		{DC6526FB-FB39-4548-A180-51E1C846A77D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC6526FB-FB39-4548-A180-51E1C846A77D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC6526FB-FB39-4548-A180-51E1C846A77D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5662298-7FCD-416B-8468-0EC4B5F58157}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5662298-7FCD-416B-8468-0EC4B5F58157}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5662298-7FCD-416B-8468-0EC4B5F58157}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{C5662298-7FCD-416B-8468-0EC4B5F58157}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5662298-7FCD-416B-8468-0EC4B5F58157}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5662298-7FCD-416B-8468-0EC4B5F58157}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
