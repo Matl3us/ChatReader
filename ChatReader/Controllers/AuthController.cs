@@ -2,6 +2,7 @@
 using ChatReader.Core.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -34,7 +35,14 @@ namespace ChatReader.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity));
 
-            return Ok(new { msg = "Authenticated successfully" });
+            return Redirect("http://localhost:5240/");
+        }
+
+        [Authorize]
+        [HttpGet("check")]
+        public ActionResult Check()
+        {
+            return Ok(new { msg = "Authorized successfully" });
         }
     }
 }
