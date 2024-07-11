@@ -1,93 +1,48 @@
-using System.Text.Json;
-using ChatReader.Data;
-using ChatReader.Dto;
-using ChatReader.Services;
+﻿using ChatReader.Core.Interfaces;
+using ChatReader.Core.Models.Dto;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
-namespace ChatReader.Controllers;
-
-public class AuthController(IHttpClientFactory clientFactory, IWebSocketClient webSocket, UserData user) : Controller
+namespace ChatReader.Controllers
 {
-    private readonly UserData _user = user;
-    private readonly IWebSocketClient _websocketClient = webSocket;
-    private readonly IHttpClientFactory _httpClientFactory = clientFactory;
-
-    [HttpGet]
-    public async Task<ActionResult> Index([FromQuery] string code)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AuthController(IAuthService authService) : ControllerBase
     {
-        var user = _user.GetUser();
-        if (!ModelState.IsValid || user == null)
-        {
-            return BadRequest(new { error = "Authentication failed" });
-        }
+        private readonly IAuthService _authService = authService;
 
-        string clientId = user.UserId;
-        string clientSecret = user.UserSecret;
-        string redirectUrl = "http://localhost:5293/auth/";
-        string requestUrl = "https://id.twitch.tv/oauth2/token";
-        FormUrlEncodedContent form = new(new Dictionary<string, string>
+        [HttpGet]
+        public async Task<ActionResult> Index([FromQuery] CodeAuthDto codeAuth)
         {
-            {"client_id", clientId},
-            {"client_secret", clientSecret},
-            {"code", code},
-            {"grant_type", "authorization_code"},
-            {"redirect_uri", redirectUrl}
-        });
-
-        var httpClient = _httpClientFactory.CreateClient();
-        var httpResponseMessage = await httpClient.PostAsync(requestUrl, form);
-
-        if (httpResponseMessage.IsSuccessStatusCode)
-        {
-            string content = await httpResponseMessage.Content.ReadAsStringAsync();
-            var twitchData = JsonSerializer.Deserialize<AccessTokenDto?>(content);
-            var token = twitchData?.access_token;
-            if (twitchData == null || string.IsNullOrEmpty(token))
+            var user = await _authService.AuthenticateAsync(codeAuth.Code);
+            if (user == null)
             {
-                return BadRequest(new { error = "Invalid token received" });
+                return BadRequest(new { error = "Authentication failed" });
             }
 
-            _websocketClient.Start(token, CancellationToken.None);
-
-            Response.Cookies.Append("token", "123", new CookieOptions
+            var claims = new List<Claim>
             {
-                Secure = true,
-                HttpOnly = true,
-                SameSite = SameSiteMode.Strict
-            });
-            return Redirect("http://localhost:5293/#/chat");
-        }
-        else
-        {
-            return BadRequest(new { error = "Error during authentication" });
-        }
-    }
+                new("Id", user.Id),
+                new("Nick", user.Nick),
+                new("Token", user.Token),
+            };
+            var claimsIdentity = new ClaimsIdentity(
+                claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
 
-    [HttpPost]
-    public async Task<ActionResult> Index([FromBody] UserAuthDto user)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new { error = "User credentials missing" });
+            return Redirect("http://localhost:5240/");
         }
 
-        string url = "https://id.twitch.tv/oauth2/";
-        string redirectUrl = "http://localhost:5293/auth/";
-        string scope = "chat:read";
-        string requestUrl = new($"{url}authorize?response_type=code&client_id={user.UserId}&redirect_uri={redirectUrl}&scope={scope}");
-
-        var httpClient = _httpClientFactory.CreateClient();
-        var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-        var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
-
-        if (httpResponseMessage.IsSuccessStatusCode)
+        [Authorize]
+        [HttpGet("check")]
+        public ActionResult Check()
         {
-            _user.SaveUser(new UserAuthDto(user.Nick, user.UserId, user.UserSecret));
-            return Ok(new { msg = "Credentials saved", requestUrl });
-        }
-        else
-        {
-            return BadRequest(new { error = "Invalid user credentials" });
+            return Ok(new { msg = "Authorized successfully" });
         }
     }
 }

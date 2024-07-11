@@ -1,41 +1,49 @@
-using ChatReader.Data;
-using ChatReader.Services;
+using ChatReader.Core;
+using ChatReader.Core.Interfaces;
+using ChatReader.Core.Queues;
+using ChatReader.Core.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<UserData>();
-builder.Services.AddSingleton<IWebSocketClient, TwitchWebSocketClient>();
-builder.Services.AddSingleton<WebSocketService>();
-
 builder.Services.AddControllers();
-builder.Services.AddHttpClient();
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(
-        policy =>
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        options.SlidingExpiration = true;
+        options.LoginPath = null;
+        options.LogoutPath = null;
+        options.Events.OnRedirectToLogin = context =>
         {
-            policy.WithOrigins("http://localhost:5173")
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
-        });
-});
+            context.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        };
+    });
+
+builder.Services.AddHttpClient<IAuthService, AuthService>();
+builder.Services.AddSingleton<ParsedMessagesStore>();
+builder.Services.AddSingleton<ClientMessagesStore>();
+builder.Services.AddScoped<WSConnectionsManager>();
 
 var app = builder.Build();
 
-app.UseRouting();
-app.UseCors();
-app.UseAuthorization();
-
-app.UseFileServer();
+var cookiePolicyOptions = new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Strict,
+};
+app.UseCookiePolicy(cookiePolicyOptions);
 
 var webSocketOptions = new WebSocketOptions
 {
     KeepAliveInterval = TimeSpan.FromMinutes(2)
 };
-
 app.UseWebSockets(webSocketOptions);
 
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseFileServer();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
