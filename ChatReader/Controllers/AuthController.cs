@@ -1,5 +1,5 @@
 ﻿using ChatReader.Core.Interfaces;
-using ChatReader.Core.Models;
+using ChatReader.Core.Models.Dto;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;

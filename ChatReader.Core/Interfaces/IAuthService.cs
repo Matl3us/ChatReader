@@ -1,4 +1,4 @@
-﻿using ChatReader.Core.Models;
+﻿using ChatReader.Core.Models.Dto;
 
 namespace ChatReader.Core.Interfaces
 {

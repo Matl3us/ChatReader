@@ -1,5 +1,5 @@
 ﻿using ChatReader.Core.Interfaces;
-using ChatReader.Core.Models;
+using ChatReader.Core.Models.Dto;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Headers;
 using System.Text.Json;

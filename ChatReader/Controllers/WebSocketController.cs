@@ -1,5 +1,5 @@
 ﻿using ChatReader.Core;
-using ChatReader.Core.Models;
+using ChatReader.Core.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,9 +7,9 @@ namespace ChatReader.Controllers
 {
     [Authorize]
     [Route("api/ws")]
-    public class WebSocketController(WSConnectionsManager connectionsManager) : ControllerBase
+    public class WebSocketController(WSConnectionsManager wsConnectionsManager) : ControllerBase
     {
-        private readonly WSConnectionsManager _connectionsManager = connectionsManager;
+        private readonly WSConnectionsManager _connectionManager = wsConnectionsManager;
 
         public async Task Index()
         {
@@ -20,20 +20,22 @@ namespace ChatReader.Controllers
                 var nick = authUser.FindFirst("Nick")!;
                 var token = authUser.FindFirst("Token")!;
 
-                using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                if (!_connectionsManager.TryAdd(id.Value, webSocket))
-                {
-                    HttpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                }
-
                 var user = new AuthUserDto()
                 {
                     Id = id.Value,
                     Nick = nick.Value,
                     Token = token.Value,
                 };
-                await _connectionsManager.StartConnectionAsync(webSocket, user);
-                _connectionsManager.TryRemove(id.Value);
+
+                using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+
+                if (!_connectionManager.TryCreateConnection(user))
+                {
+                    HttpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                }
+
+
+                await _connectionManager.StartConnectionAsync(webSocket, user);
             }
             else
             {

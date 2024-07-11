@@ -1,4 +1,4 @@
-﻿namespace ChatReader.Core.Models
+﻿namespace ChatReader.Core.Models.Dto
 {
     public class UserListDto
     {
