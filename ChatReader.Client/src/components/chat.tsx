@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { useSocket } from "../providers/socket-provider";
 
 const Chat = () => {
+  const { socket } = useSocket();
   const [channelName, setChannelName] = useState("");
   const [joinedChannels, setJoinedChannels] = useState<Array<string>>([]);
 
@@ -10,6 +12,7 @@ const Chat = () => {
     setChannelName("");
     if (!joinedChannels.includes(channelName)) {
       setJoinedChannels(joinedChannels.concat(channelName));
+      socket?.send(`JOIN #${channelName}`)
     }
   };
 
@@ -17,6 +20,7 @@ const Chat = () => {
     setJoinedChannels(
       joinedChannels.filter((channel) => channel != channelName)
     );
+    socket?.send(`PART #${channelName}`)
   };
 
   return (
@@ -44,7 +48,12 @@ const Chat = () => {
               {joinedChannels.map((channel) => (
                 <div key={channel} className="text-text">
                   <TabsTrigger value={channel}>{channel}</TabsTrigger>
-                  <button className="font-bold" onClick={() => removeChannel(channel)}>X</button>
+                  <button
+                    className="font-bold"
+                    onClick={() => removeChannel(channel)}
+                  >
+                    X
+                  </button>
                 </div>
               ))}
             </TabsList>
