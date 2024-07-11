@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 type SocketContextType = {
   socket: WebSocket | null;
@@ -9,6 +9,10 @@ const SocketContext = createContext<SocketContextType>({
   socket: null,
   isConnected: false,
 });
+
+export const useSocket = () => {
+  return useContext(SocketContext);
+};
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
