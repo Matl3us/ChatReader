@@ -22,12 +22,13 @@ public class WSConnectionsManager(ParsedMessagesStore parsedMessagesStore, Clien
         bool isSuccessful = _parsedMessagesStore.TryGetMessageQueue(id, out var parsedQueue);
         isSuccessful &= _clientMessagesStore.TryGetMessageQueue(id, out var clientQueue);
 
-        if (!isSuccessful) { return false; }
+        if (!isSuccessful)
+        {
+            _parsedMsgQueue = parsedQueue ?? new ConcurrentQueue<ParsedIRCMessage>();
+            _clientMsgQueue = clientQueue ?? new ConcurrentQueue<string>();
+        }
 
-        _parsedMsgQueue = parsedQueue ?? new ConcurrentQueue<ParsedIRCMessage>();
-        _clientMsgQueue = clientQueue ?? new ConcurrentQueue<string>();
-
-        return isSuccessful;
+        return true;
     }
 
     public async Task StartConnectionAsync(WebSocket webSocket, AuthUserDto authUser)
