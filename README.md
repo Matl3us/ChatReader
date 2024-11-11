@@ -14,8 +14,6 @@
 - **Backend**: ASP.NET Core
 - **Frontend**: React, Tailwind CSS
 
-## Installation
-
 ### Prerequisites
 
 - `.NET 8` and `Node.js` installed.
