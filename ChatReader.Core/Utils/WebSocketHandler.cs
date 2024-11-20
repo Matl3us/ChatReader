@@ -30,7 +30,11 @@ namespace ChatReader.Core.Utils
             {
                 if (queue.TryDequeue(out var message))
                 {
-                    var serializedMsg = JsonSerializer.Serialize(message);
+                    var options = new JsonSerializerOptions
+                    {
+                        Converters = { new TagsConverter() }
+                    };
+                    var serializedMsg = JsonSerializer.Serialize(message, options);
                     var bytes = Encoding.UTF8.GetBytes(serializedMsg);
                     await webSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, cancellationToken);
                 }

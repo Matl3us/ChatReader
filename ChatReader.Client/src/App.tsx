@@ -19,14 +19,12 @@ export default function App() {
   }, []);
 
   if (!isAuthenticated) {
-    return (
-     <Login/>
-    );
+    return <Login />;
   }
 
   return (
     <SocketProvider>
-      <Chat/>
+      <Chat />
     </SocketProvider>
   );
 }

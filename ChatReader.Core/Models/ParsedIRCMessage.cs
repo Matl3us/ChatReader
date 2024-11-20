@@ -1,4 +1,7 @@
-﻿namespace ChatReader.Core.Models
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace ChatReader.Core.Models
 {
     public enum IRCMessageCommand
     {
@@ -55,5 +58,18 @@
         public string User { get; set; }
         public string Channel { get; set; }
         public string Content { get; set; }
+    }
+
+    public class TagsConverter : JsonConverter<ITags>
+    {
+        public override ITags Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return JsonSerializer.Deserialize<PRIVMSGTags>(ref reader, options);
+        }
+
+        public override void Write(Utf8JsonWriter writer, ITags value, JsonSerializerOptions options)
+        {
+            JsonSerializer.Serialize(writer, value, value.GetType(), options);
+        }
     }
 }

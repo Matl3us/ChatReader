@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Input } from "./ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useSocket } from "../providers/socket-provider";
+import { messageStore } from "@/data/messageStore";
+import ChannelMessages from "./channel-messages";
 
 const Chat = () => {
   const { socket } = useSocket();
@@ -21,6 +23,7 @@ const Chat = () => {
     setJoinedChannels(
       joinedChannels.filter((channel) => channel != channelName)
     );
+    messageStore.clearChannelMessages(channelName);
     socket?.send(`PART #${channelName}`);
   };
 
@@ -42,7 +45,7 @@ const Chat = () => {
           Add
         </button>
       </div>
-      <div className="mt-4 flex-1">
+      <div className="p-1 mt-4 mb-1 flex-1 overflow-auto">
         {joinedChannels.length > 0 ? (
           <Tabs defaultValue={joinedChannels[0]}>
             <TabsList>
@@ -67,7 +70,7 @@ const Chat = () => {
                 value={channel}
                 className="p-2 rounded-md mt-8 bg-stone-900"
               >
-                Joined channel {channel}
+                <ChannelMessages channelName={channel} />
               </TabsContent>
             ))}
           </Tabs>

@@ -1,3 +1,4 @@
+import { MessageDTO, messageStore } from "@/data/messageStore";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type SocketContextType = {
@@ -32,7 +33,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     socket.addEventListener("message", (event: MessageEvent) => {
-      console.log("Message from server ", event.data);
+      messageStore.addMessageToChannel(JSON.parse(event.data) as MessageDTO);
     });
 
     socket.addEventListener("error", () => {

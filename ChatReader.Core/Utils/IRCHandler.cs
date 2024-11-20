@@ -22,6 +22,7 @@ namespace ChatReader.Core.Utils
 
             await SendMessageAsync(webSocket, $"PASS oauth:{authUser.Token}", cancellationToken);
             await SendMessageAsync(webSocket, $"NICK {authUser.Nick}", cancellationToken);
+            await SendMessageAsync(webSocket, "CAP REQ :twitch.tv/tags", cancellationToken);
 
             while (webSocket.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
             {
