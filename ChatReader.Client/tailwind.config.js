@@ -9,16 +9,18 @@ export default {
   ],
   prefix: "",
   theme: {
-    colors: {
-      background: "#0f0e17",
-      text: "#fffffe",
-      button: "#ff8906",
-    },
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
+    extend: {
+      colors: {
+        background: "#0f0e17",
+        text: "#fffffe",
+        button: "#ff8906",
+      },
+      container: {
+        center: true,
+        padding: "2rem",
+        screens: {
+          "2xl": "1400px",
+        },
       },
     },
   },
