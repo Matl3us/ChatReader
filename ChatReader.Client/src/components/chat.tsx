@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Input } from "./ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useSocket } from "../providers/socket-provider";
@@ -10,6 +10,14 @@ const Chat = () => {
   const [channelName, setChannelName] = useState("");
   const [message, setMessage] = useState("");
   const [joinedChannels, setJoinedChannels] = useState<Array<string>>([]);
+
+  const tabsRootRef = useRef<HTMLDivElement>(null);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      addChannel(channelName);
+    }
+  };
 
   const addChannel = (channelName: string) => {
     setChannelName("");
@@ -27,6 +35,36 @@ const Chat = () => {
     socket?.send(`PART #${channelName}`);
   };
 
+  const sendMessage = () => {
+    if (tabsRootRef.current) {
+      const children = tabsRootRef.current.childNodes;
+      for (const child of children) {
+        if (child instanceof HTMLElement) {
+          if (child.getAttribute("data-state") === "active") {
+            const activeChannel = child.getAttribute("id")?.split("-").pop();
+            if (activeChannel) {
+              socket?.send(`PRIVMSG #${activeChannel} :${message}`);
+              messageStore.addMessageToChannel({
+                Prefix: "",
+                Command: 7,
+                Params: "",
+                Tags: {
+                  Id: "",
+                  Badges: [],
+                  Color: "#595959",
+                },
+                User: "#Your message#",
+                Channel: activeChannel,
+                Content: message,
+              });
+              setMessage("");
+            }
+          }
+        }
+      }
+    }
+  };
+
   return (
     <div className="p-4 h-screen flex flex-col">
       <div className="bg-stone-950 rounded-md p-4">
@@ -36,6 +74,7 @@ const Chat = () => {
             placeholder="Channel name"
             value={channelName}
             onChange={(e) => setChannelName(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
           <button
             className="bg-button rounded-md p-2 text-text"
@@ -49,7 +88,7 @@ const Chat = () => {
       </div>
       <div className="p-1 mt-4 mb-1 flex-1 overflow-auto">
         {joinedChannels.length > 0 ? (
-          <Tabs defaultValue={joinedChannels[0]}>
+          <Tabs ref={tabsRootRef} defaultValue={joinedChannels[0]}>
             <TabsList>
               {joinedChannels.map((channel) => (
                 <div
@@ -88,7 +127,12 @@ const Chat = () => {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
-        <button className="bg-button rounded-md p-2 text-text">Send</button>
+        <button
+          className="bg-button rounded-md p-2 text-text"
+          onClick={() => sendMessage()}
+        >
+          Send
+        </button>
       </div>
     </div>
   );
