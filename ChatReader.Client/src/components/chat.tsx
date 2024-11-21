@@ -86,7 +86,7 @@ const Chat = () => {
           </button>
         </div>
       </div>
-      <div className="p-1 mt-4 mb-1 flex-1 overflow-auto">
+      <div className="p-1 my-6 flex-1 overflow-auto">
         {joinedChannels.length > 0 ? (
           <Tabs ref={tabsRootRef} defaultValue={joinedChannels[0]}>
             <TabsList>
@@ -109,7 +109,7 @@ const Chat = () => {
               <TabsContent
                 key={channel}
                 value={channel}
-                className="p-2 rounded-md mt-8 bg-stone-950"
+                className="p-4 rounded-md mt-8 bg-stone-950"
               >
                 <ChannelMessages channelName={channel} />
               </TabsContent>
