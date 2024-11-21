@@ -28,22 +28,24 @@ const Chat = () => {
   };
 
   return (
-    <div className="p-6 h-screen flex flex-col">
-      <h1 className="text-3xl font-semibold text-text mb-2">Chat reader</h1>
-      <div className="w-64 flex gap-2">
-        <Input
-          placeholder="Channel name"
-          value={channelName}
-          onChange={(e) => setChannelName(e.target.value)}
-        />
-        <button
-          className="bg-button rounded-md p-2 text-text"
-          onClick={() => {
-            addChannel(channelName);
-          }}
-        >
-          Add
-        </button>
+    <div className="p-4 h-screen flex flex-col">
+      <div className="bg-stone-950 rounded-md p-4">
+        <h1 className="text-3xl font-semibold text-text mb-2">Chat reader</h1>
+        <div className="w-64 flex gap-2">
+          <Input
+            placeholder="Channel name"
+            value={channelName}
+            onChange={(e) => setChannelName(e.target.value)}
+          />
+          <button
+            className="bg-button rounded-md p-2 text-text"
+            onClick={() => {
+              addChannel(channelName);
+            }}
+          >
+            Add
+          </button>
+        </div>
       </div>
       <div className="p-1 mt-4 mb-1 flex-1 overflow-auto">
         {joinedChannels.length > 0 ? (
@@ -68,7 +70,7 @@ const Chat = () => {
               <TabsContent
                 key={channel}
                 value={channel}
-                className="p-2 rounded-md mt-8 bg-stone-900"
+                className="p-2 rounded-md mt-8 bg-stone-950"
               >
                 <ChannelMessages channelName={channel} />
               </TabsContent>
@@ -76,7 +78,7 @@ const Chat = () => {
           </Tabs>
         ) : (
           <div>
-            <p className="text-text">Join a Twitch chat</p>
+            <p className="text-text italic font-semibold">Join a Twitch chat</p>
           </div>
         )}
       </div>

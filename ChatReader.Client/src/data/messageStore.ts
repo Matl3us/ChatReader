@@ -23,8 +23,6 @@ class MessagesStore {
   }
 
   public addMessageToChannel(message: MessageDTO) {
-    console.log("Adding message:", message);
-
     if (!this.messagesMap.has(message.Channel)) {
       this.messagesMap.set(message.Channel, []);
     }
