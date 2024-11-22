@@ -67,7 +67,7 @@ const Chat = () => {
 
   return (
     <div className="p-4 h-screen flex flex-col">
-      <div className="bg-stone-950 rounded-md p-4">
+      <div className="h-32 bg-stone-950 rounded-md p-4">
         <h1 className="text-3xl font-semibold text-text mb-2">Chat reader</h1>
         <div className="w-64 flex gap-2">
           <Input
@@ -86,10 +86,14 @@ const Chat = () => {
           </button>
         </div>
       </div>
-      <div className="p-1 my-6 flex-1 overflow-auto">
-        {joinedChannels.length > 0 ? (
-          <Tabs ref={tabsRootRef} defaultValue={joinedChannels[0]}>
-            <TabsList>
+      {joinedChannels.length > 0 ? (
+        <div className="p-1 my-6 flex flex-1 h-4/6">
+          <Tabs
+            className="flex flex-col flex-1"
+            ref={tabsRootRef}
+            defaultValue={joinedChannels[0]}
+          >
+            <TabsList className="overflow-x-auto max-w-md whitespace-nowrap">
               {joinedChannels.map((channel) => (
                 <div
                   key={channel}
@@ -109,31 +113,33 @@ const Chat = () => {
               <TabsContent
                 key={channel}
                 value={channel}
-                className="p-4 rounded-md mt-8 bg-stone-950"
+                className="flex-1 overflow-auto p-4 rounded-md my-6 bg-stone-950"
               >
                 <ChannelMessages channelName={channel} />
               </TabsContent>
             ))}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Send message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+              <button
+                className="bg-button rounded-md p-2 text-text"
+                onClick={() => sendMessage()}
+              >
+                Send
+              </button>
+            </div>
           </Tabs>
-        ) : (
-          <div>
-            <p className="text-text italic font-semibold">Join a Twitch chat</p>
-          </div>
-        )}
-      </div>
-      <div className="flex gap-2">
-        <Input
-          placeholder="Send message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        <button
-          className="bg-button rounded-md p-2 text-text"
-          onClick={() => sendMessage()}
-        >
-          Send
-        </button>
-      </div>
+        </div>
+      ) : (
+        <div>
+          <p className="mt-6 text-text italic font-semibold">
+            Join a Twitch chat
+          </p>
+        </div>
+      )}
     </div>
   );
 };
