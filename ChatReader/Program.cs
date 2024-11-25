@@ -22,6 +22,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddHttpClient<IAuthService, AuthService>();
+builder.Services.AddHttpClient<ITwitchHTTPService, TwitchHTTPService>();
 builder.Services.AddSingleton<ParsedMessagesStore>();
 builder.Services.AddSingleton<ClientMessagesStore>();
 builder.Services.AddScoped<WSConnectionsManager>();
