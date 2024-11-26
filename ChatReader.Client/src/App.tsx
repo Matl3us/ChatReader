@@ -11,6 +11,8 @@ export default function App() {
     const response = await fetch(url);
     if (response.ok) {
       setIsAuthenticated(true);
+      const userInfo = await response.json();
+      localStorage.setItem("user", JSON.stringify(userInfo));
     }
   };
 

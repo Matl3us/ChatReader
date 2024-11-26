@@ -1,21 +1,71 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "./ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useSocket } from "../providers/socket-provider";
 import { messageStore } from "@/data/messageStore";
 import ChannelMessages from "./channel-messages";
 
+type User = {
+  id: string;
+  username: string;
+};
+
+type UserInfo = {
+  id: string;
+  login: string;
+  display_name: string;
+  type: string;
+  description: string;
+  profile_image_url: string;
+  offline_image_url: string;
+  created_at: string;
+};
+
+type UserColor = {
+  user_id: string;
+  user_login: string;
+  user_name: string;
+  color: string;
+};
+
 const Chat = () => {
   const { socket } = useSocket();
   const [channelName, setChannelName] = useState("");
   const [message, setMessage] = useState("");
   const [joinedChannels, setJoinedChannels] = useState<Array<string>>([]);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [userColor, setUserColor] = useState<UserColor | null>(null);
 
   const tabsRootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const userInfoStr = localStorage.getItem("user")!;
+    const user = JSON.parse(userInfoStr) as User;
+    getUserInfo(user.username);
+    getUserColor(user.username);
+  }, []);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       addChannel(channelName);
+    }
+  };
+
+  const getUserInfo = async (username: string) => {
+    const url = `http://localhost:5240/api/user?username=${username}`;
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      setUserInfo(data);
+    }
+  };
+
+  const getUserColor = async (username: string) => {
+    const url = `http://localhost:5240/api/user/color?username=${username}`;
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      setUserColor(data);
     }
   };
 
@@ -36,7 +86,7 @@ const Chat = () => {
   };
 
   const sendMessage = () => {
-    if (tabsRootRef.current) {
+    if (tabsRootRef.current && userInfo) {
       const children = tabsRootRef.current.childNodes;
       for (const child of children) {
         if (child instanceof HTMLElement) {
@@ -51,9 +101,9 @@ const Chat = () => {
                 Tags: {
                   Id: "",
                   Badges: [],
-                  Color: "#595959",
+                  Color: userColor?.color ?? "#595959",
                 },
-                User: "#Your message#",
+                User: userColor?.user_name ?? "#Your message#",
                 Channel: activeChannel,
                 Content: message,
               });
@@ -67,27 +117,39 @@ const Chat = () => {
 
   return (
     <div className="p-4 h-screen flex flex-col">
-      <div className="h-32 bg-stone-950 rounded-md p-4">
-        <h1 className="text-3xl font-semibold text-text mb-2">Chat reader</h1>
-        <div className="w-64 flex gap-2">
-          <Input
-            placeholder="Channel name"
-            value={channelName}
-            onChange={(e) => setChannelName(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <button
-            className="bg-button rounded-md p-2 text-text"
-            onClick={() => {
-              addChannel(channelName);
-            }}
-          >
-            Add
-          </button>
+      <div className="h-32 flex justify-between bg-stone-950 rounded-md px-6 py-4">
+        <div>
+          <h1 className="text-3xl font-semibold text-text mb-2">Chat reader</h1>
+          <div className="w-64 flex gap-2">
+            <Input
+              placeholder="Channel name"
+              value={channelName}
+              onChange={(e) => setChannelName(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <button
+              className="bg-button rounded-md p-2 text-text"
+              onClick={() => {
+                addChannel(channelName);
+              }}
+            >
+              Add
+            </button>
+          </div>
         </div>
+        {userInfo && (
+          <div className="flex flex-col gap-2 items-center justify-center">
+            <img
+              src={userInfo.profile_image_url}
+              alt="Profile image"
+              className="w-14 h-14 rounded-lg"
+            />
+            <p className="text-text font-semibold">{userInfo.display_name}</p>
+          </div>
+        )}
       </div>
       {joinedChannels.length > 0 ? (
-        <div className="p-1 my-6 flex flex-1 h-4/6">
+        <div className="p-1 flex flex-1 h-4/6">
           <Tabs
             className="flex flex-col flex-1"
             ref={tabsRootRef}
@@ -113,7 +175,7 @@ const Chat = () => {
               <TabsContent
                 key={channel}
                 value={channel}
-                className="flex-1 overflow-auto p-4 rounded-md my-6 bg-stone-950"
+                className="flex-1 overflow-auto p-4 rounded-md mb-4 bg-stone-950"
               >
                 <ChannelMessages channelName={channel} />
               </TabsContent>
@@ -135,7 +197,7 @@ const Chat = () => {
         </div>
       ) : (
         <div>
-          <p className="mt-6 text-text italic font-semibold">
+          <p className="p-2 mt-6 text-text italic font-semibold">
             Join a Twitch chat
           </p>
         </div>

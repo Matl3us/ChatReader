@@ -42,7 +42,12 @@ namespace ChatReader.Controllers
         [HttpGet("check")]
         public ActionResult Check()
         {
-            return Ok(new { msg = "Authorized successfully" });
+            var authUser = HttpContext.User;
+            var nick = authUser.FindFirst("Nick")?.Value;
+            return Ok(new
+            {
+                username = nick
+            });
         }
     }
 }
