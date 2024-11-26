@@ -11,7 +11,7 @@ namespace ChatReader.Core.Services
         private readonly HttpClient _httpClient = httpClient;
         private readonly IConfiguration _config = config;
 
-        public async Task<UserListDto?> GetUserInfo(string token, string username)
+        public async Task<UserInfoDto?> GetUserInfo(string token, string username)
         {
             string clientId = _config["ClientId"];
 
@@ -25,8 +25,8 @@ namespace ChatReader.Core.Services
             if (!response.IsSuccessStatusCode) { return null; }
 
             string content = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(content);
-            return JsonSerializer.Deserialize<UserListDto>(content);
+            var data = JsonSerializer.Deserialize<TwitchDataWrapperDto<UserInfoDto>>(content);
+            return data?.GetFirst();
         }
     }
 }

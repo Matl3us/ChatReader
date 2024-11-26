@@ -4,6 +4,6 @@ namespace ChatReader.Core.Interfaces
 {
     public interface ITwitchHTTPService
     {
-        public Task<UserListDto?> GetUserInfo(string token, string username);
+        public Task<UserInfoDto?> GetUserInfo(string token, string username);
     }
 }

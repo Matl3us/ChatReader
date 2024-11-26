@@ -66,12 +66,12 @@ namespace ChatReader.Core.Services
             return JsonSerializer.Deserialize<TokenAuthDto?>(content);
         }
 
-        private static async Task<UserListDto?> ParseUserRequest(HttpResponseMessage response)
+        private static async Task<TwitchDataWrapperDto<UserInfoDto>?> ParseUserRequest(HttpResponseMessage response)
         {
             if (!response.IsSuccessStatusCode) { return null; }
 
             string content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<UserListDto?>(content);
+            return JsonSerializer.Deserialize<TwitchDataWrapperDto<UserInfoDto>?>(content);
         }
     }
 }
