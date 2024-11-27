@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { SocketProvider } from "./providers/socket-provider";
 import Login from "./components/login";
 import Chat from "./components/chat";
+import { BadgesProvider } from "./providers/badges-provider";
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -26,7 +27,9 @@ export default function App() {
 
   return (
     <SocketProvider>
-      <Chat />
+      <BadgesProvider>
+        <Chat />
+      </BadgesProvider>
     </SocketProvider>
   );
 }

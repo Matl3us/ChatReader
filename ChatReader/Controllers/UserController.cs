@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ChatReader.Controllers
 {
     [Authorize]
-    [Route("api/user")]
+    [Route("api/[controller]")]
     public class UserController(ITwitchHTTPService twitchService) : ControllerBase
     {
         private readonly ITwitchHTTPService _twichService = twitchService;

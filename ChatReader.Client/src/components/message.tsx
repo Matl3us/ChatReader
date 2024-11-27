@@ -1,12 +1,21 @@
 import { MessageDTO } from "@/data/messageStore";
+import { mapBadgesArray } from "@/lib/utils";
+import { BadgesContext } from "@/providers/badges-provider";
+import { useContext } from "react";
 
 const Message = ({ msg }: { msg: MessageDTO }) => {
+  const globalBadges = useContext(BadgesContext);
+
   return (
-    <div>
-      <p className="inline font-semibold" style={{ color: msg.Tags.Color }}>
+    <div className="my-1">
+      <p
+        className="inline-flex items-center gap-1 font-semibold align-middle"
+        style={{ color: msg.Tags.Color }}
+      >
+        {mapBadgesArray(msg.Tags.Badges, globalBadges)}
         {msg.User}
       </p>
-      <p className="inline">: {msg.Content}</p>
+      <p className="inline align-middle">: {msg.Content}</p>
     </div>
   );
 };

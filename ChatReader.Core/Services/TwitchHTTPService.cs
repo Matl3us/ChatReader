@@ -50,5 +50,20 @@ namespace ChatReader.Core.Services
             var data = JsonSerializer.Deserialize<TwitchDataWrapperDto<UserChatColorDto>>(content);
             return data?.GetFirst();
         }
+
+        public async Task<List<BadgeSetDto>> GetGlobalChatBadges(string token)
+        {
+            string requestUrl = "https://api.twitch.tv/helix/chat/badges/global";
+            var requestMessage = PrepareMessage(HttpMethod.Get, requestUrl, token);
+
+            var response = await _httpClient.SendAsync(requestMessage);
+            if (!response.IsSuccessStatusCode) { return []; }
+
+            string content = await response.Content.ReadAsStringAsync();
+            var data = JsonSerializer.Deserialize<TwitchDataWrapperDto<BadgeSetDto>>(content);
+            if (data is null) return [];
+
+            return data.GetAll();
+        }
     }
 }
