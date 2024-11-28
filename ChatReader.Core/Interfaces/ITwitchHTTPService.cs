@@ -7,5 +7,6 @@ namespace ChatReader.Core.Interfaces
         public Task<UserInfoDto?> GetUserInfo(string token, string username);
         public Task<UserChatColorDto?> GetUserChatColor(string token, string username);
         public Task<List<BadgeSetDto>> GetGlobalChatBadges(string token);
+        public Task<List<BadgeSetDto>> GetChannelChatBadges(string token, string username);
     }
 }

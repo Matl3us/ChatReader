@@ -65,5 +65,24 @@ namespace ChatReader.Core.Services
 
             return data.GetAll();
         }
+
+        public async Task<List<BadgeSetDto>> GetChannelChatBadges(string token, string username)
+        {
+            var userInfo = await GetUserInfo(token, username);
+            if (userInfo == null) return [];
+
+            string requestUrl = "https://api.twitch.tv/helix/chat/badges";
+            var query = $"?broadcaster_id={userInfo.id}&";
+            var requestMessage = PrepareMessage(HttpMethod.Get, requestUrl + query, token);
+
+            var response = await _httpClient.SendAsync(requestMessage);
+            if (!response.IsSuccessStatusCode) { return []; }
+
+            string content = await response.Content.ReadAsStringAsync();
+            var data = JsonSerializer.Deserialize<TwitchDataWrapperDto<BadgeSetDto>>(content);
+            if (data is null) return [];
+
+            return data.GetAll();
+        }
     }
 }

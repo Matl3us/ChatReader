@@ -18,5 +18,19 @@ namespace ChatReader.Controllers
             var badgesList = await _twichService.GetGlobalChatBadges(token.Value);
             return Ok(badgesList);
         }
+
+        [HttpGet("badges")]
+        public async Task<IActionResult> ChannelBadges([FromQuery] string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                return BadRequest("Username cannot be empty");
+            }
+
+            var authUser = HttpContext.User;
+            var token = authUser.FindFirst("Token")!;
+            var badgesList = await _twichService.GetChannelChatBadges(token.Value, username);
+            return Ok(badgesList);
+        }
     }
 }
