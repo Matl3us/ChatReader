@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Input } from "./ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useSocket } from "../providers/socket-provider";
 import { messageStore } from "@/data/messageStore";
 import ChannelMessages from "./channel-messages";
+import { BadgesContext } from "@/providers/badges-provider";
 
 type User = {
   id: string;
@@ -30,6 +31,7 @@ type UserColor = {
 
 const Chat = () => {
   const { socket } = useSocket();
+  const { fetchChannelBadges } = useContext(BadgesContext);
   const [channelName, setChannelName] = useState("");
   const [message, setMessage] = useState("");
   const [joinedChannels, setJoinedChannels] = useState<Array<string>>([]);
@@ -73,6 +75,7 @@ const Chat = () => {
     setChannelName("");
     if (!joinedChannels.includes(channelName) && channelName.length > 0) {
       setJoinedChannels(joinedChannels.concat(channelName));
+      fetchChannelBadges(channelName);
       socket?.send(`JOIN #${channelName}`);
     }
   };
